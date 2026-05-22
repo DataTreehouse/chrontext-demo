@@ -1,0 +1,11 @@
+# Generated data
+data/weather.duckdb
+data/stations_graph.ttl
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+.venv/

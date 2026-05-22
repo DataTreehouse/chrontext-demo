@@ -1,0 +1,17 @@
+PREFIX wx: <http://weather.treehouse.example/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Pure knowledge graph query, no time-series.
+# Shows all stations, their type, location, and installed sensors.
+
+SELECT ?name ?municipality ?type ?elevation ?sensor ?measurand
+WHERE {
+    ?station a wx:WeatherStation ;
+             rdfs:label       ?name ;
+             wx:municipality  ?municipality ;
+             wx:stationType   ?type ;
+             wx:elevation     ?elevation ;
+             wx:hasSensor     ?sensor .
+    ?sensor  wx:measurand     ?measurand .
+}
+ORDER BY ?name ?measurand

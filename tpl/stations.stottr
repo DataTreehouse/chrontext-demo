@@ -1,0 +1,39 @@
+@prefix wx:   <http://weather.treehouse.example/> .
+@prefix tpl:  <http://weather.treehouse.example/tpl/> .
+@prefix ottr: <http://ns.ottr.xyz/0.4/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+
+tpl:Station[
+    ! ottr:IRI ?station_uri,
+    xsd:string ?name,
+    xsd:string ?municipality,
+    xsd:double ?latitude,
+    xsd:double ?longitude,
+    xsd:string ?station_type,
+    xsd:long   ?elevation_m,
+    xsd:long   ?installed_year
+] :: {
+    ottr:Triple(?station_uri, rdf:type,          wx:WeatherStation),
+    ottr:Triple(?station_uri, rdfs:label,        ?name),
+    ottr:Triple(?station_uri, wx:municipality,   ?municipality),
+    ottr:Triple(?station_uri, wx:latitude,       ?latitude),
+    ottr:Triple(?station_uri, wx:longitude,      ?longitude),
+    ottr:Triple(?station_uri, wx:stationType,    ?station_type),
+    ottr:Triple(?station_uri, wx:elevation,      ?elevation_m),
+    ottr:Triple(?station_uri, wx:installedYear,  ?installed_year)
+} .
+
+
+tpl:Sensor[
+    ottr:IRI   ?station_uri,
+    ! ottr:IRI ?sensor_uri,
+    xsd:string ?measurand
+] :: {
+    ottr:Triple(?sensor_uri, rdf:type,       wx:Sensor),
+    ottr:Triple(?sensor_uri, wx:measurand,   ?measurand),
+    ottr:Triple(?sensor_uri, wx:installedAt, ?station_uri),
+    ottr:Triple(?station_uri, wx:hasSensor,  ?sensor_uri)
+} .

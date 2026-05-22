@@ -1,0 +1,13 @@
+station_id,name,municipality,latitude,longitude,station_type,elevation_m,installed_year
+ST001,Blindern,Oslo,59.9423,10.7200,urban,94,1937
+ST002,Florida,Bergen,60.3833,5.3322,coastal,12,1949
+ST003,Værnes,Trondheim,63.4571,10.9239,coastal,12,1946
+ST004,Tromsø,Tromsø,69.6533,18.9553,coastal,100,1920
+ST005,Fokstugu,Dovre,62.1135,9.2847,mountain,952,1923
+ST006,Sognefjellet,Luster,61.5647,7.9939,mountain,1413,1978
+ST007,Flesland,Bergen,60.2900,5.2283,coastal,48,1955
+ST008,Sola,Stavanger,58.8767,5.6378,coastal,7,1937
+ST009,Bodø,Bodø,67.2692,14.3651,coastal,11,1940
+ST010,Kautokeino,Kautokeino,69.0100,23.0400,mountain,307,1877
+ST011,Rena,Åmot,61.1500,11.4700,urban,240,1896
+ST012,Hammerfest,Hammerfest,70.6634,23.6821,coastal,10,1956
