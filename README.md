@@ -1,8 +1,8 @@
 # Chrontext Demo — Federated Time-Series Queries
 
-## What is virtualization?
+## What is virtualisation?
 
-In the knowledge graph world, *virtualization* means querying data **where it already
+In the knowledge graph world, *virtualisation* means querying data **where it already
 lives** — without copying it into the graph first. Instead of extracting millions of
 time-series rows into RDF triples (slow, memory-hungry, and instantly stale), chrontext
 leaves the data in DuckDB, PostgreSQL, BigQuery, or an OPC UA server and translates
@@ -10,7 +10,7 @@ the relevant parts of your SPARQL query into native database calls on the fly.
 
 Why this is powerful: your knowledge graph captures *what things are and how they relate*
 (sensors, stations, grid topology), while your time-series database stores *what happened
-and when* (measurements, events, readings). Virtualization lets you ask questions that
+and when* (measurements, events, readings). Virtualisation lets you ask questions that
 span both in a single query — no ETL pipeline, no stale snapshots, no glue code.
 The query engine pushes filters and aggregations down to the database, so only the
 results you need ever cross the boundary.
