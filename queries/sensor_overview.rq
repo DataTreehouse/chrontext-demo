@@ -4,14 +4,18 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 # Pure knowledge graph query, no time-series.
 # Shows all stations, their type, location, and installed sensors.
 
-SELECT ?name ?municipality ?type ?elevation ?sensor ?measurand
+SELECT ?name ?muni_name ?type_name ?elevation ?sensor ?measurand_name ?unit
 WHERE {
     ?station a wx:WeatherStation ;
              rdfs:label       ?name ;
-             wx:municipality  ?municipality ;
+             wx:municipality  ?muni ;
              wx:stationType   ?type ;
              wx:elevation     ?elevation ;
              wx:hasSensor     ?sensor .
+    ?muni    rdfs:label       ?muni_name .
+    ?type    rdfs:label       ?type_name .
     ?sensor  wx:measurand     ?measurand .
+    ?measurand rdfs:label     ?measurand_name ;
+               wx:hasUnit     ?unit .
 }
-ORDER BY ?name ?measurand
+ORDER BY ?name ?measurand_name

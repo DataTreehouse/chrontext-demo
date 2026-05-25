@@ -27,22 +27,76 @@ model.add_template(open("tpl/stations.stottr").read())
 
 df_stations = pl.read_csv("data/stations.csv")
 df_stations = df_stations.with_columns(
-    (pl.lit(ns) + pl.col("station_id")).alias("station_uri")
+    (pl.lit(ns) + pl.col("station_id")).alias("station_uri"),
+    (pl.lit(ns + "municipality/") + pl.col("municipality")).alias("municipality_uri"),
+    (pl.lit(ns + "StationType") + pl.col("station_type").str.to_titlecase()).alias("station_type_uri"),
+    pl.col("installed_year").cast(pl.String).alias("installed_year_str"),
 )
 
 model.map(ns_tpl + "Station", df_stations.select([
-    "station_uri", "name", "municipality", "latitude", "longitude",
-    "station_type", "elevation_m", "installed_year",
-]))
+    "station_uri", "name", "municipality_uri", "latitude", "longitude",
+    "station_type_uri", "elevation_m", "installed_year_str",
+]).rename({
+    "municipality_uri": "municipality",
+    "station_type_uri": "station_type",
+    "installed_year_str": "installed_year",
+}))
+
+# Add rdfs:label for municipality and station type IRIs so they have
+# human-readable names in query results.
+muni_labels = df_stations.select(
+    (pl.lit(ns + "municipality/") + pl.col("municipality")).alias("subject"),
+    pl.col("municipality").alias("object"),
+).unique()
+model.map_triples(muni_labels, predicate="http://www.w3.org/2000/01/rdf-schema#label")
+
+type_labels = df_stations.select(
+    (pl.lit(ns + "StationType") + pl.col("station_type").str.to_titlecase()).alias("subject"),
+    pl.col("station_type").alias("object"),
+).unique()
+model.map_triples(type_labels, predicate="http://www.w3.org/2000/01/rdf-schema#label")
 
 measurands = ["temperature", "wind_speed", "precipitation"]
+
+# Define measurand IRIs with type, label, and unit.
+measurand_metadata = {
+    "temperature":   {"iri": "MeasurandTemperature",   "label": "Temperature",   "unit": "unit:DEG_C"},
+    "wind_speed":    {"iri": "MeasurandWindSpeed",      "label": "Wind Speed",     "unit": "unit:M-PER-SEC"},
+    "precipitation": {"iri": "MeasurandPrecipitation",  "label": "Precipitation",  "unit": "unit:MilliM"},
+}
+
+# Map measurand metadata into the graph
+measurand_triples = []
+for name, meta in measurand_metadata.items():
+    uri = f"{ns}{meta['iri']}"
+    measurand_triples.append({"subject": uri, "object": f"{ns}Measurand"})
+model.map_triples(
+    pl.DataFrame(measurand_triples),
+    predicate="http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+)
+
+measurand_labels = []
+measurand_units = []
+for name, meta in measurand_metadata.items():
+    uri = f"{ns}{meta['iri']}"
+    measurand_labels.append({"subject": uri, "object": meta["label"]})
+    measurand_units.append({"subject": uri, "object": meta["unit"]})
+model.map_triples(
+    pl.DataFrame(measurand_labels),
+    predicate="http://www.w3.org/2000/01/rdf-schema#label",
+)
+model.map_triples(
+    pl.DataFrame(measurand_units),
+    predicate=f"{ns}hasUnit",
+)
+
 sensor_rows = []
 for row in df_stations.iter_rows(named=True):
     for measurand in measurands:
         sensor_rows.append({
             "station_uri": row["station_uri"],
             "sensor_uri":  f"{ns}{row['station_id']}_sensor_{measurand}",
-            "measurand":   measurand,
+            "measurand":   f"{ns}{measurand_metadata[measurand]['iri']}",
         })
 
 model.map(ns_tpl + "Sensor", pl.DataFrame(sensor_rows))
@@ -138,23 +192,24 @@ result = model.query("""
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX ct:   <https://github.com/DataTreehouse/chrontext#>
 
-    SELECT ?name ?municipality (AVG(?temp) AS ?avg_temp)
-                               (MIN(?temp) AS ?min_temp)
-                               (MAX(?temp) AS ?max_temp)
+    SELECT ?name ?muni_name (AVG(?temp) AS ?avg_temp)
+                            (MIN(?temp) AS ?min_temp)
+                            (MAX(?temp) AS ?max_temp)
     WHERE {
         ?station a wx:WeatherStation ;
                  rdfs:label      ?name ;
-                 wx:municipality ?municipality ;
-                 wx:stationType  "coastal" ;
+                 wx:municipality ?muni ;
+                 wx:stationType  wx:StationTypeCoastal ;
                  wx:hasSensor    ?sensor .
-        ?sensor  wx:measurand    "temperature" .
+        ?muni    rdfs:label      ?muni_name .
+        ?sensor  wx:measurand    wx:MeasurandTemperature .
 
         ?sensor ct:hasTimeseries ?ts .
         ?ts ct:hasDataPoint ?dp .
         ?dp ct:hasTimestamp ?t ;
             ct:hasValue     ?temp .
     }
-    GROUP BY ?name ?municipality
+    GROUP BY ?name ?muni_name
     ORDER BY ?avg_temp
 """)
 

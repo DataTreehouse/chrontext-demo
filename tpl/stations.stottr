@@ -9,12 +9,12 @@
 tpl:Station[
     ! ottr:IRI ?station_uri,
     xsd:string ?name,
-    xsd:string ?municipality,
+    ottr:IRI   ?municipality,
     xsd:double ?latitude,
     xsd:double ?longitude,
-    xsd:string ?station_type,
+    ottr:IRI   ?station_type,
     xsd:long   ?elevation_m,
-    xsd:long   ?installed_year
+    xsd:gYear  ?installed_year
 ] :: {
     ottr:Triple(?station_uri, rdf:type,          wx:WeatherStation),
     ottr:Triple(?station_uri, rdfs:label,        ?name),
@@ -30,7 +30,7 @@ tpl:Station[
 tpl:Sensor[
     ottr:IRI   ?station_uri,
     ! ottr:IRI ?sensor_uri,
-    xsd:string ?measurand
+    ottr:IRI   ?measurand
 ] :: {
     ottr:Triple(?sensor_uri, rdf:type,       wx:Sensor),
     ottr:Triple(?sensor_uri, wx:measurand,   ?measurand),

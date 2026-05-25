@@ -1,0 +1,155 @@
+@prefix wx:   <http://weather.treehouse.example/> .
+@prefix ct:   <https://github.com/DataTreehouse/chrontext#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+
+
+# ── Classes ──────────────────────────────────────────
+
+wx:WeatherStation a rdfs:Class ;
+    rdfs:label "Weather Station" ;
+    rdfs:comment "A fixed location where meteorological observations are made." .
+
+wx:Sensor a rdfs:Class ;
+    rdfs:label "Sensor" ;
+    rdfs:comment "A device installed at a weather station that measures a specific quantity." .
+
+wx:Municipality a rdfs:Class ;
+    rdfs:label "Municipality" ;
+    rdfs:comment "A Norwegian municipality (kommune)." .
+
+wx:StationType a rdfs:Class ;
+    rdfs:label "Station Type" ;
+    rdfs:comment "Classification of a weather station by its environment." .
+
+wx:Measurand a rdfs:Class ;
+    rdfs:label "Measurand" ;
+    rdfs:comment "A physical quantity that a sensor measures." .
+
+ct:Timeseries a rdfs:Class ;
+    rdfs:label "Timeseries" ;
+    rdfs:comment "A link between a sensor and its time-series data in an external database. Used by chrontext for virtualisation." .
+
+ct:DataPoint a rdfs:Class ;
+    rdfs:label "Data Point" ;
+    rdfs:comment "A single timestamped measurement value. Virtual — materialised on the fly from the external database." .
+
+
+# ── Object properties ────────────────────────────────
+
+wx:hasSensor a rdf:Property ;
+    rdfs:label "has sensor" ;
+    rdfs:domain wx:WeatherStation ;
+    rdfs:range wx:Sensor .
+
+wx:installedAt a rdf:Property ;
+    rdfs:label "installed at" ;
+    rdfs:comment "Inverse of wx:hasSensor." ;
+    rdfs:domain wx:Sensor ;
+    rdfs:range wx:WeatherStation ;
+    owl:inverseOf wx:hasSensor .
+
+wx:municipality a rdf:Property ;
+    rdfs:label "municipality" ;
+    rdfs:domain wx:WeatherStation ;
+    rdfs:range wx:Municipality .
+
+wx:stationType a rdf:Property ;
+    rdfs:label "station type" ;
+    rdfs:domain wx:WeatherStation ;
+    rdfs:range wx:StationType .
+
+wx:measurand a rdf:Property ;
+    rdfs:label "measurand" ;
+    rdfs:domain wx:Sensor ;
+    rdfs:range wx:Measurand .
+
+wx:hasUnit a rdf:Property ;
+    rdfs:label "has unit" ;
+    rdfs:domain wx:Measurand ;
+    rdfs:comment "The unit of measurement, as a QUDT unit IRI." .
+
+ct:hasTimeseries a rdf:Property ;
+    rdfs:label "has timeseries" ;
+    rdfs:domain wx:Sensor ;
+    rdfs:range ct:Timeseries .
+
+ct:hasDataPoint a rdf:Property ;
+    rdfs:label "has data point" ;
+    rdfs:domain ct:Timeseries ;
+    rdfs:range ct:DataPoint .
+
+
+# ── Datatype properties ──────────────────────────────
+
+wx:latitude a rdf:Property ;
+    rdfs:label "latitude" ;
+    rdfs:domain wx:WeatherStation ;
+    rdfs:range xsd:double .
+
+wx:longitude a rdf:Property ;
+    rdfs:label "longitude" ;
+    rdfs:domain wx:WeatherStation ;
+    rdfs:range xsd:double .
+
+wx:elevation a rdf:Property ;
+    rdfs:label "elevation (m)" ;
+    rdfs:domain wx:WeatherStation ;
+    rdfs:range xsd:long .
+
+wx:installedYear a rdf:Property ;
+    rdfs:label "installed year" ;
+    rdfs:domain wx:WeatherStation ;
+    rdfs:range xsd:gYear .
+
+ct:hasExternalId a rdf:Property ;
+    rdfs:label "has external ID" ;
+    rdfs:comment "Maps a timeseries node to its identifier in the external database." ;
+    rdfs:domain ct:Timeseries ;
+    rdfs:range xsd:string .
+
+ct:hasResource a rdf:Property ;
+    rdfs:label "has resource" ;
+    rdfs:comment "Maps a timeseries node to a resource key in chrontext's resource_sql_map." ;
+    rdfs:domain ct:Timeseries ;
+    rdfs:range xsd:string .
+
+ct:hasValue a rdf:Property ;
+    rdfs:label "has value" ;
+    rdfs:domain ct:DataPoint ;
+    rdfs:range xsd:double .
+
+ct:hasTimestamp a rdf:Property ;
+    rdfs:label "has timestamp" ;
+    rdfs:domain ct:DataPoint ;
+    rdfs:range xsd:dateTime .
+
+
+# ── Station type instances ───────────────────────────
+
+wx:StationTypeUrban a wx:StationType ;
+    rdfs:label "urban" .
+
+wx:StationTypeCoastal a wx:StationType ;
+    rdfs:label "coastal" .
+
+wx:StationTypeMountain a wx:StationType ;
+    rdfs:label "mountain" .
+
+
+# ── Measurand instances ──────────────────────────────
+
+wx:MeasurandTemperature a wx:Measurand ;
+    rdfs:label "Temperature" ;
+    wx:hasUnit unit:DEG_C .
+
+wx:MeasurandWindSpeed a wx:Measurand ;
+    rdfs:label "Wind Speed" ;
+    wx:hasUnit unit:M-PER-SEC .
+
+wx:MeasurandPrecipitation a wx:Measurand ;
+    rdfs:label "Precipitation" ;
+    wx:hasUnit unit:MilliM .
